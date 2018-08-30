@@ -25,7 +25,9 @@ class StreamingHttpHandler(BaseHTTPRequestHandler):
             content_type = 'text/html; charset=utf-8'
             tpl = Template(self.server.index_template)
             content = tpl.safe_substitute(dict(
-                WS_PORT=settings.WS_PORT, WIDTH=settings.WIDTH, HEIGHT=settings.HEIGHT, COLOR=settings.COLOR,
+                CAMERA_WS_PORT=settings.CAMERA_WS_PORT,
+                SENSORS_WS_PORT=settings.SENSORS_WS_PORT,
+                WIDTH=settings.WIDTH, HEIGHT=settings.HEIGHT, COLOR=settings.COLOR,
                 BGCOLOR=settings.BGCOLOR))
         else:
             self.send_error(404, 'File not found')

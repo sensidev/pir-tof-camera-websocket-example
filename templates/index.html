@@ -1,58 +1,58 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta name="viewport" content="width=${WIDTH}, initial-scale=1"/>
-	<title>jsmpeg streaming</title>
-	<style type="text/css">
-		body {
-			background: ${BGCOLOR};
-			text-align: center;
-			margin-top: 10%;
-		}
-		#videoCanvas {
-			/* Always stretch the canvas to 640x480, regardless of its
-			internal size. */
-			width: ${WIDTH}px;
-			height: ${HEIGHT}px;
-		}
-	</style>
+    <meta name="viewport" content="width=${WIDTH}, initial-scale=1"/>
+    <title>jsmpeg streaming</title>
+    <style type="text/css">
+        body {
+            background: ${BGCOLOR};
+            text-align: center;
+            margin-top: 10%;
+        }
 
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        #videoCanvas {
+            /* Always stretch the canvas to 640x480, regardless of its
+            internal size. */
+            width: ${WIDTH} px;
+            height: ${HEIGHT} px;
+        }
+    </style>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 </head>
 <body>
-	<!-- The Canvas size specified here is the "initial" internal resolution. jsmpeg will
-		change this internal resolution to whatever the source provides. The size the
-		canvas is displayed on the website is dictated by the CSS style.
-	-->
-	<canvas id="videoCanvas" width="${WIDTH}" height="${HEIGHT}">
-		<p>
-			Please use a browser that supports the Canvas Element, like
-			<a href="http://www.google.com/chrome">Chrome</a>,
-			<a href="http://www.mozilla.com/firefox/">Firefox</a>,
-			<a href="http://www.apple.com/safari/">Safari</a> or Internet Explorer 10
-		</p>
-	</canvas>
-	<script type="text/javascript" src="jsmpg.js"></script>
-	<script type="text/javascript">
-		// Show loading notice
-		const canvas = document.getElementById('videoCanvas');
-		const ctx = canvas.getContext('2d');
-		ctx.fillStyle = '${COLOR}';
-		ctx.fillText('Loading...', canvas.width/2-30, canvas.height/3);
+<!-- The Canvas size specified here is the "initial" internal resolution. jsmpeg will
+    change this internal resolution to whatever the source provides. The size the
+    canvas is displayed on the website is dictated by the CSS style.
+-->
+<canvas id="videoCanvas" width="${WIDTH}" height="${HEIGHT}">
+    <p>
+        Please use a browser that supports the Canvas Element, like
+        <a href="http://www.google.com/chrome">Chrome</a>,
+        <a href="http://www.mozilla.com/firefox/">Firefox</a>,
+        <a href="http://www.apple.com/safari/">Safari</a> or Internet Explorer 10
+    </p>
+</canvas>
+<script type="text/javascript" src="jsmpg.js"></script>
+<script type="text/javascript">
+    // Show loading notice
+    const canvas = document.getElementById('videoCanvas');
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '${COLOR}';
+    ctx.fillText('Loading...', canvas.width / 2 - 30, canvas.height / 3);
 
-		// Setup the WebSocket connection and start the player
-		const client = new WebSocket('ws://' + window.location.hostname + ':${WS_PORT}/');
-		const sensorClient = new WebSocket('ws://' + window.location.hostname + ':${WS_PORT}/');
+    // Setup the WebSocket connection and start the player
+    const cameraClient = new WebSocket('ws://' + window.location.hostname + ':${CAMERA_WS_PORT}/');
+    const player = new jsmpeg(cameraClient, {canvas: canvas});
 
-		sensorClient.onmessage = function (event) {
-            const isCameraFrame = event.data instanceof Blob;
+    const sensorsClient = new WebSocket('ws://' + window.location.hostname + ':${SENSORS_WS_PORT}/');
+    sensorsClient.onmessage = function (event) {
+        const isCameraFrame = event.data instanceof Blob;
 
-            if (!isCameraFrame) {
-                console.log(event);
-            }
-        };
-
-		const player = new jsmpeg(client, {canvas:canvas});
-	</script>
+        if (!isCameraFrame) {
+            console.log(event);
+        }
+    };
+</script>
 </body>
 </html>

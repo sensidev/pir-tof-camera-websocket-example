@@ -3,8 +3,10 @@ import random
 from threading import Thread
 from time import sleep
 
-from VL53L0X_rasp_python.python import VL53L0X
 from gpiozero import MotionSensor
+
+from VL53L0X_rasp_python.python import VL53L0X
+
 
 class SensorsThread(Thread):
     def __init__(self, websocket_server):
