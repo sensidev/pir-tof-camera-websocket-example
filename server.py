@@ -4,8 +4,8 @@ from time import sleep
 from threads.broadcast_thread import BroadcastThread
 from threads.camera_thread import CameraThread
 from threads.camera_websocket_thread import CameraWebSocketThread
-from threads.http_server_thread import HTTPServerThread
 from threads.distance_sensors_thread import DistanceSensorsThread
+from threads.http_server_thread import HTTPServerThread
 from threads.motion_sensors_thread import MotionSensorsThread
 from threads.sensors_websocket_thread import SensorsWebSocketThread
 
@@ -19,7 +19,16 @@ def main():
 
     broadcast_thread = BroadcastThread(camera_thread.camera, camera_websocket_thread.server)
 
-    distance_sensor_thread = DistanceSensorsThread(sensors_websocket_thread.server)
+    distance_sensor_thread = DistanceSensorsThread(sensors_websocket_thread.server, sensors=[
+        {
+            'i2c_address': 0x2B,
+            'shutdown_pin': 23
+        },
+        {
+            'i2c_address': 0x2A,
+            'shutdown_pin': 24
+        },
+    ])
     motion_sensor_thread = MotionSensorsThread(sensors_websocket_thread.server)
 
     camera_thread.start_recording(broadcast_thread.output)

@@ -50,7 +50,9 @@
         const isCameraFrame = event.data instanceof Blob;
 
         if (!isCameraFrame) {
-            console.log(event);
+            const data = JSON.parse(event.data);
+
+            console.log(data);
         }
     };
 </script>

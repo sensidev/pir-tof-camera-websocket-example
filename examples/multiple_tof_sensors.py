@@ -11,8 +11,6 @@ sensor1_shutdown_pin = 23
 # GPIO for Sensor 2 shutdown pin
 sensor2_shutdown_pin = 24
 
-# GPIO.setwarnings(False)
-
 # Setup GPIO for shutdown pins on each VL53L0X
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(sensor1_shutdown_pin, GPIO.OUT)
