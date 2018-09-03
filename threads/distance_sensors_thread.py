@@ -11,7 +11,6 @@ class DistanceSensorsThread(Thread):
     """
     Thread sampling ToF sensors then broadcast a number of sampled values to all websocket clients.
     """
-    NUMBER_OF_SAMPLES_PER_BROADCAST = 16
 
     def __init__(self, websocket_server, sensors=None):
         """
@@ -38,21 +37,10 @@ class DistanceSensorsThread(Thread):
     def run(self):
         try:
             while self.should_run:
-                for _ in range(self.NUMBER_OF_SAMPLES_PER_BROADCAST):
-                    self._sample_sensors()
-
                 self.websocket_server.manager.broadcast(self._get_payload_dump(), binary=False)
-                self._clean_samples()
+                sleep(self.sampling_rate_ms / 1000.0)
         finally:
             pass
-
-    def _sample_sensors(self):
-        for s in self.sensors:
-            s['samples'].append({
-                'value': s.get('instance').get_distance(),
-                'timestamp': time()
-            })
-        sleep(self.sampling_rate_ms / 1000.0)
 
     def stop(self):
         print('Finishing distance sensors thread ...')
@@ -62,17 +50,20 @@ class DistanceSensorsThread(Thread):
 
     def _get_payload_dump(self):
         payload = {
-            'sensor_type': 'ToF',
-            'data': []
+            'type': 'ToF',
+            'samples': []
         }
         for s in self.sensors:
-            payload['data'].append(s.get('samples'))
+            payload['samples'].append({
+                'i2c_address': s.get('i2c_address'),
+                'shutdown_pin': s.get('shutdown_pin'),
+                'sample': {
+                    'value': s.get('instance').get_distance(),
+                    'timestamp': time()
+                }
+            })
 
         return json.dumps(payload)
-
-    def _clean_samples(self):
-        for s in self.sensors:
-            s['samples'] = []
 
     def _configure_sensors(self):
         GPIO.setmode(GPIO.BCM)
@@ -80,7 +71,6 @@ class DistanceSensorsThread(Thread):
         self._set_all_shutdown_pins_to_low()
         self._create_sensor_instances()
         self._turn_on_sensors_one_by_one()
-        self._clean_samples()
 
     def _turn_on_sensors_one_by_one(self):
         """Set shutdown pin high one after the other for all sensors"""

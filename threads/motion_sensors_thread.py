@@ -24,10 +24,12 @@ class MotionSensorsThread(Thread):
         self.should_run = True
 
         self.sensors = sensors
+        self._init_sensors_state_dict()
 
         for s in self.sensors:
             s['instance'] = MotionSensor(s.get('pin'))
-            s['instance'].when_motion = lambda instance: self._detect_motion_for(instance)
+            s['instance'].when_motion = lambda instance: self._detect_event_for(instance)
+            s['instance'].when_no_motion = lambda instance: self._detect_event_for(instance)
 
     def run(self):
         try:
@@ -42,12 +44,32 @@ class MotionSensorsThread(Thread):
 
         self.should_run = False
 
-    def _detect_motion_for(self, sensor_instance):
-        print('Detect Motion For PIR sensor: {}'.format(sensor_instance.pin.number))
+    def _get_payload(self):
         payload = {
-            'sensor_type': 'PIR',
-            'pin': sensor_instance.pin.number,
-            'value': sensor_instance.motion_detected,
+            "type": "PIR",
+            "samples": []
+        }
+        for s in self.sensors:
+            pin = s.get('pin')
+
+            payload['samples'].append({
+                'pin': pin,
+                'sample': self.sensor_state_dict[pin],
+            })
+
+        return payload
+
+    def _detect_event_for(self, sensor_instance):
+        print('Detect Event For PIR sensor: {}'.format(sensor_instance.pin.number))
+
+        self.sensor_state_dict[sensor_instance.pin.number] = {
+            'value': 1 if sensor_instance.motion_detected else 0,
             'timestamp': time()
         }
-        self.websocket_server.manager.broadcast(json.dumps(payload), binary=False)
+
+        self.websocket_server.manager.broadcast(json.dumps(self._get_payload()), binary=False)
+
+    def _init_sensors_state_dict(self):
+        self.sensor_state_dict = {
+            s.get('pin'): {'value': 0, 'timestamp': time()} for s in self.sensors
+        }
