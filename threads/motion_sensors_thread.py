@@ -6,7 +6,16 @@ from gpiozero import MotionSensor
 
 
 class MotionSensorsThread(Thread):
-    def __init__(self, websocket_server):
+    """
+    Thread sampling PIR sensors and broadcast whenever one of the sensors detect motion.
+    """
+
+    def __init__(self, websocket_server, sensors=None):
+        """
+        Initiate PIR sensors.
+        :param websocket_server: Websocket server
+        :param sensors: list of objects like {'pin': 4}
+        """
         super(MotionSensorsThread, self).__init__()
 
         print('Initializing motion sensors thread')
@@ -14,10 +23,11 @@ class MotionSensorsThread(Thread):
         self.websocket_server = websocket_server
         self.should_run = True
 
-        self.pir = MotionSensor(4)
-        self.pir.when_motion = self._when_motion
+        self.sensors = sensors
 
-        self.payload_dict = {}
+        for s in self.sensors:
+            s['instance'] = MotionSensor(s.get('pin'))
+            s['instance'].when_motion = lambda instance: self._detect_motion_for(instance)
 
     def run(self):
         try:
@@ -32,9 +42,12 @@ class MotionSensorsThread(Thread):
 
         self.should_run = False
 
-    def _when_motion(self):
-        self.payload_dict['pir1'] = {
-            'value': self.pir.motion_detected,
+    def _detect_motion_for(self, sensor_instance):
+        print('Detect Motion For PIR sensor: {}'.format(sensor_instance.pin.number))
+        payload = {
+            'sensor_type': 'PIR',
+            'pin': sensor_instance.pin.number,
+            'value': sensor_instance.motion_detected,
             'timestamp': time()
         }
-        self.websocket_server.manager.broadcast(json.dumps(self.payload_dict), binary=False)
+        self.websocket_server.manager.broadcast(json.dumps(payload), binary=False)

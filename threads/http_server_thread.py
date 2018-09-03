@@ -1,9 +1,8 @@
 import io
+from http.server import HTTPServer, BaseHTTPRequestHandler
 from string import Template
 from threading import Thread
 from time import time
-
-from http.server import HTTPServer, BaseHTTPRequestHandler
 
 import settings
 
@@ -21,6 +20,9 @@ class StreamingHttpHandler(BaseHTTPRequestHandler):
         elif self.path == '/jsmpg.js':
             content_type = 'application/javascript'
             content = self.server.jsmpg_content
+        elif self.path == '/client.js':
+            content_type = 'application/javascript'
+            content = self.server.client_content
         elif self.path == '/index.html':
             content_type = 'text/html; charset=utf-8'
             tpl = Template(self.server.index_template)
@@ -50,6 +52,8 @@ class StreamingHttpServer(HTTPServer):
             self.index_template = f.read()
         with io.open('assets/js/jsmpeg.js', 'r') as f:
             self.jsmpg_content = f.read()
+        with io.open('assets/js/client.js', 'r') as f:
+            self.client_content = f.read()
 
 
 class HTTPServerThread(Thread):
@@ -64,4 +68,3 @@ class HTTPServerThread(Thread):
         print('Shutting down HTTP server ... ')
 
         self.http_server.shutdown()
-

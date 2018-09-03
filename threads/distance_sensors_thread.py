@@ -1,6 +1,6 @@
 import json
 from threading import Thread
-from time import sleep
+from time import sleep, time
 
 import RPi.GPIO as GPIO
 
@@ -48,7 +48,10 @@ class DistanceSensorsThread(Thread):
 
     def _sample_sensors(self):
         for s in self.sensors:
-            s['samples'].append(s.get('instance').get_distance())
+            s['samples'].append({
+                'value': s.get('instance').get_distance(),
+                'timestamp': time()
+            })
         sleep(self.sampling_rate_ms / 1000.0)
 
     def stop(self):
@@ -58,9 +61,12 @@ class DistanceSensorsThread(Thread):
         self._stop_ranging()
 
     def _get_payload_dump(self):
-        payload = []
+        payload = {
+            'sensor_type': 'ToF',
+            'data': []
+        }
         for s in self.sensors:
-            payload.append(s.get('samples'))
+            payload['data'].append(s.get('samples'))
 
         return json.dumps(payload)
 

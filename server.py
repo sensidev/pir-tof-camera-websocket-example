@@ -29,7 +29,10 @@ def main():
             'shutdown_pin': 24
         },
     ])
-    motion_sensor_thread = MotionSensorsThread(sensors_websocket_thread.server)
+    motion_sensor_thread = MotionSensorsThread(sensors_websocket_thread.server, sensors=[
+        {'pin': 14},
+        {'pin': 4},
+    ])
 
     camera_thread.start_recording(broadcast_thread.output)
 

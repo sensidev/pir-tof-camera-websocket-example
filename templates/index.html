@@ -33,28 +33,15 @@
         <a href="http://www.apple.com/safari/">Safari</a> or Internet Explorer 10
     </p>
 </canvas>
-<script type="text/javascript" src="jsmpg.js"></script>
 <script type="text/javascript">
-    // Show loading notice
-    const canvas = document.getElementById('videoCanvas');
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '${COLOR}';
-    ctx.fillText('Loading...', canvas.width / 2 - 30, canvas.height / 3);
+    const cameraPort = '${CAMERA_WS_PORT}';
+    const sensorsPort = '${SENSORS_WS_PORT}';
 
-    // Setup the WebSocket connection and start the player
-    const cameraClient = new WebSocket('ws://' + window.location.hostname + ':${CAMERA_WS_PORT}/');
-    const player = new jsmpeg(cameraClient, {canvas: canvas});
+    const color = '${COLOR}';
+</script>
+<script type="text/javascript" src="jsmpg.js"></script>
+<script type="text/javascript" src="client.js">
 
-    const sensorsClient = new WebSocket('ws://' + window.location.hostname + ':${SENSORS_WS_PORT}/');
-    sensorsClient.onmessage = function (event) {
-        const isCameraFrame = event.data instanceof Blob;
-
-        if (!isCameraFrame) {
-            const data = JSON.parse(event.data);
-
-            console.log(data);
-        }
-    };
 </script>
 </body>
 </html>
