@@ -50,11 +50,12 @@ class DistanceSensorsThread(Thread):
 
     def _get_payload_dump(self):
         payload = {
-            'type': 'ToF',
+            'type': 'distance',
             'samples': []
         }
-        for s in self.sensors:
+        for i, s in enumerate(self.sensors, start=1):
             payload['samples'].append({
+                'id': 'motion-sensor-{}'.format(i),
                 'i2c_address': s.get('i2c_address'),
                 'shutdown_pin': s.get('shutdown_pin'),
                 'sample': {

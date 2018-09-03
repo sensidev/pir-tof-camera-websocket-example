@@ -35,9 +35,11 @@
     </p>
 </canvas>
 <div id="sensors">
-    <div id="tof-sensors"></div>
-    <div id="pir-sensors"></div>
+    <div id="distance-sensors"></div>
+    <div id="motion-sensors"></div>
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js"></script>
 
 <!-- Transfer some settings from server to client -->
 <script type="text/javascript">
@@ -46,6 +48,7 @@
 
     const color = '${COLOR}';
 </script>
+
 <script type="text/javascript" src="jsmpg.js"></script>
 <script type="text/javascript" src="client.js">
 

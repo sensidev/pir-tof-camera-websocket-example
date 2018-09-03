@@ -1,6 +1,8 @@
 (function ($) {
 
-    const Client = {
+    const Dashboard = {
+
+        motionChart: null,
 
         init: function () {
             const canvas = document.getElementById('video-canvas');
@@ -19,10 +21,10 @@
                 if (!isCameraFrame) {
                     const payload = JSON.parse(event.data);
 
-                    if (payload['sensor_type'] === 'ToF') {
-                        Client.displayToFSensors(payload['data']);
-                    } else if (payload['sensor_type'] === 'PIR') {
-                        Client.displayPIRSensors(payload['data']);
+                    if (payload['type'] === 'distance') {
+                        Dashboard.displayDistanceSensors(payload['samples']);
+                    } else if (payload['type'] === 'motion') {
+                        Dashboard.displayMotionSensors(payload['samples']);
                     }
 
                     console.log(payload);
@@ -30,23 +32,103 @@
             };
         },
 
-        displayToFSensors(data) {
+        displayDistanceSensors(data) {
 
         },
 
-        displayPIRSensors(data) {
-            const children = $('#pir-sensors').children();
+        updateMotionCharts: function (samples) {
+            for (let i = 0; i < samples.length; i++) {
+                const s = samples[i];
 
-            if (!children.length) {
-                for (let i = 0; i <= data.length; i++) {
-                    children.add($('<div>'));
-                }
+                let data = Dashboard.motionChart.data.datasets[i].data;
+
+                data.push(Dashboard.getMotionDataFor(s));
             }
-        }
+
+
+            Dashboard.motionChart.update();
+        },
+
+        displayMotionSensors(samples) {
+            this.createMotionCharts(samples);
+            this.updateMotionCharts(samples);
+        },
+
+        getMotionDataFor: function (sample) {
+            return {
+                x: new Date(sample['sample']['timestamp'] * 1000),
+                y: sample['sample']['value']
+            };
+        },
+
+        createMotionCharts: function (samples) {
+            const motionSensorsWrapper = $('#motion-sensors');
+
+            if (motionSensorsWrapper.is(':empty')) {
+                const canvasId = 'motion-canvas';
+                motionSensorsWrapper.append(Dashboard.getMotionCanvasFor(canvasId));
+                Dashboard.motionChart = new Chart(document.getElementById(canvasId).getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        datasets: Dashboard.getMotionChartDatasets(samples)
+                    },
+                    options: {
+                        responsive: true,
+                        title: {
+                            display: true,
+                            text: 'Chart.js Time Point Data'
+                        },
+                        scales: {
+                            xAxes: [{
+                                type: 'time',
+                                display: true,
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: 'Date'
+                                },
+                                ticks: {
+                                    major: {
+                                        fontStyle: 'bold',
+                                        fontColor: '#FF0000'
+                                    }
+                                }
+                            }],
+                            yAxes: [{
+                                display: true,
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: 'value'
+                                }
+                            }]
+                        }
+                    }
+                })
+            }
+        },
+
+        getMotionChartDatasets: function (samples) {
+            let datasets = [];
+            samples.forEach(function (s) {
+                datasets.push({
+                    label: s.id,
+                    pointRadius: 10,
+                    pointStyle: 'circle',
+                    showLine: false,
+                    tension: 0,
+                    data: []
+                })
+            });
+            return datasets;
+        },
+
+
+        getMotionCanvasFor: function (id) {
+            return $('<canvas>').attr('id', id).width(400).height(400);
+        },
 
     };
 
 
-    Client.init();
+    Dashboard.init();
 
 })($);

@@ -46,13 +46,14 @@ class MotionSensorsThread(Thread):
 
     def _get_payload(self):
         payload = {
-            "type": "PIR",
+            "type": "motion",
             "samples": []
         }
-        for s in self.sensors:
+        for i, s in enumerate(self.sensors, start=1):
             pin = s.get('pin')
 
             payload['samples'].append({
+                'id': 'motion-sensor-{}'.format(i),
                 'pin': pin,
                 'sample': self.sensor_state_dict[pin],
             })
@@ -61,6 +62,7 @@ class MotionSensorsThread(Thread):
 
     def _detect_event_for(self, sensor_instance):
         print('Detect Event For PIR sensor: {}'.format(sensor_instance.pin.number))
+        print('Motion detected: {}'.format(sensor_instance.motion_detected))
 
         self.sensor_state_dict[sensor_instance.pin.number] = {
             'value': 1 if sensor_instance.motion_detected else 0,
