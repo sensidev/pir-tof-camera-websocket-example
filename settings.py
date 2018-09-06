@@ -14,3 +14,19 @@ JSMPEG_MAGIC = b'jsmp'
 JSMPEG_HEADER = Struct('>4sHH')
 VFLIP = False
 HFLIP = False
+
+DISTANCE_SENSORS = [
+    {
+        'i2c_address': 0x2B,
+        'shutdown_pin': 23
+    },
+    {
+        'i2c_address': 0x2A,
+        'shutdown_pin': 24
+    },
+]
+
+MOTION_SENSORS = [
+    {'pin': 14},
+    {'pin': 4},
+]
