@@ -8,6 +8,8 @@ from VL53L0X_rasp_python.python import VL53L0X
 
 
 class DistanceSensorsThread(Thread):
+    MAX_MEASURABLE_DISTANCE = 1500
+
     """
     Thread sampling ToF sensors then broadcast a number of sampled values to all websocket clients.
     """
@@ -55,16 +57,21 @@ class DistanceSensorsThread(Thread):
         }
         for i, s in enumerate(self.sensors, start=1):
             payload['samples'].append({
-                'id': 'motion-sensor-{}'.format(i),
+                'id': 'distance-sensor-{}'.format(i),
                 'i2c_address': s.get('i2c_address'),
                 'shutdown_pin': s.get('shutdown_pin'),
                 'sample': {
-                    'value': s.get('instance').get_distance(),
+                    'value': self._get_distance_for(s),
                     'timestamp': time()
                 }
             })
 
         return json.dumps(payload)
+
+    def _get_distance_for(self, sensor):
+        sampled_distance = sensor.get('instance').get_distance()
+
+        return sampled_distance if sampled_distance < self.MAX_MEASURABLE_DISTANCE else self.MAX_MEASURABLE_DISTANCE
 
     def _configure_sensors(self):
         GPIO.setmode(GPIO.BCM)

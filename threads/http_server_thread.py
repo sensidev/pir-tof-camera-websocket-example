@@ -23,6 +23,9 @@ class StreamingHttpHandler(BaseHTTPRequestHandler):
         elif self.path == '/client.js':
             content_type = 'application/javascript'
             content = self.server.client_content
+        elif self.path == '/styles.css':
+            content_type = 'text/css'
+            content = self.server.styles_content
         elif self.path == '/index.html':
             content_type = 'text/html; charset=utf-8'
             tpl = Template(self.server.index_template)
@@ -54,6 +57,8 @@ class StreamingHttpServer(HTTPServer):
             self.jsmpg_content = f.read()
         with io.open('assets/js/client.js', 'r') as f:
             self.client_content = f.read()
+        with io.open('assets/css/styles.css', 'r') as f:
+            self.styles_content = f.read()
 
 
 class HTTPServerThread(Thread):

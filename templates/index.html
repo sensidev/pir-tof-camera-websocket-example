@@ -3,20 +3,7 @@
 <head>
     <meta name="viewport" content="width=${WIDTH}, initial-scale=1"/>
     <title>jsmpeg streaming</title>
-    <style type="text/css">
-        body {
-            background: ${BGCOLOR};
-            text-align: center;
-            margin-top: 10%;
-        }
-
-        #videoCanvas {
-            /* Always stretch the canvas to 640x480, regardless of its
-            internal size. */
-            width: ${WIDTH} px;
-            height: ${HEIGHT} px;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="styles.css">
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 </head>
@@ -26,17 +13,16 @@
     change this internal resolution to whatever the source provides. The size the
     canvas is displayed on the website is dictated by the CSS style.
 -->
-<canvas id="video-canvas" width="${WIDTH}" height="${HEIGHT}">
-    <p>
-        Please use a browser that supports the Canvas Element, like
-        <a href="http://www.google.com/chrome">Chrome</a>,
-        <a href="http://www.mozilla.com/firefox/">Firefox</a>,
-        <a href="http://www.apple.com/safari/">Safari</a> or Internet Explorer 10
-    </p>
-</canvas>
-<div id="sensors">
-    <div id="distance-sensors"></div>
-    <div id="motion-sensors"></div>
+
+<div class="grid-container">
+    <div id="camera-wrapper" class="grid-item">
+        <h1>Live Raspberry Camera</h1>
+        <h3>using websockets.</h3>
+        <canvas id="video-canvas" width="${WIDTH}" height="${HEIGHT}"></canvas>
+    </div>
+
+    <div id="sensors-wrapper" class="grid-item">
+    </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js"></script>

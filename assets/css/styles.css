@@ -1,0 +1,23 @@
+body {
+    background: #FFF;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: auto auto;
+}
+
+.grid-item {
+    align-self: end;
+}
+
+#video-canvas {
+    /* Always stretch the canvas to 640x480, regardless of its  internal size. */
+    width: 640px;
+    height: 480px;
+}
+
+#sensors-wrapper {
+    position: relative;
+    height: 90vh;
+}

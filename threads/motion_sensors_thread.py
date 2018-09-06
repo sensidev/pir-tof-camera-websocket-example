@@ -10,6 +10,8 @@ class MotionSensorsThread(Thread):
     Thread sampling PIR sensors and broadcast whenever one of the sensors detect motion.
     """
 
+    WHEN_MOTION_VALUE = 1000
+
     def __init__(self, websocket_server, sensors=None):
         """
         Initiate PIR sensors.
@@ -29,7 +31,6 @@ class MotionSensorsThread(Thread):
         for s in self.sensors:
             s['instance'] = MotionSensor(s.get('pin'))
             s['instance'].when_motion = lambda instance: self._detect_event_for(instance)
-            s['instance'].when_no_motion = lambda instance: self._detect_event_for(instance)
 
     def run(self):
         try:
@@ -65,7 +66,7 @@ class MotionSensorsThread(Thread):
         print('Motion detected: {}'.format(sensor_instance.motion_detected))
 
         self.sensor_state_dict[sensor_instance.pin.number] = {
-            'value': 1 if sensor_instance.motion_detected else 0,
+            'value': self.WHEN_MOTION_VALUE if sensor_instance.motion_detected else 0,
             'timestamp': time()
         }
 
