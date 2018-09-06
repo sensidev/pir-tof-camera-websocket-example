@@ -13,7 +13,7 @@ Detect Motion, Distance and stream live Raspberry Pi camera using websockets.
 1. Start your Raspberry Pi and `ssh` into it
 2. `mkdir sandbox`
 3. `cd sandbox`
-4. `git clone --recursive https://github.com/sensidev/pir-tof-camera-websoket-example.git`
+4. `git clone --recursive https://github.com/sensidev/pir-tof-camera-websocket-example.git`
 5. `python3 -m venv virtualenv`
 6. `source virtualenv/bin/activate`
 7. `cd pir-tof-camera-websoket-example/`
