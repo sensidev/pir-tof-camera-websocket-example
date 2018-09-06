@@ -32,8 +32,8 @@ class StreamingHttpHandler(BaseHTTPRequestHandler):
             content = tpl.safe_substitute(dict(
                 CAMERA_WS_PORT=settings.CAMERA_WS_PORT,
                 SENSORS_WS_PORT=settings.SENSORS_WS_PORT,
-                WIDTH=settings.WIDTH, HEIGHT=settings.HEIGHT, COLOR=settings.COLOR,
-                BGCOLOR=settings.BGCOLOR))
+                WIDTH=settings.WIDTH, HEIGHT=settings.HEIGHT, COLOR=settings.COLOR
+            ))
         else:
             self.send_error(404, 'File not found')
             return

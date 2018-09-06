@@ -4,22 +4,18 @@
         chartInstance: null,
         chartTimeAxisRangeInSeconds: 20,
 
-        motionDatasets: [],
-        distanceDatasets: [],
+        chartMotionDatasets: [],
+        chartDistanceDatasets: [],
 
         init: function () {
-            const canvas = document.getElementById('video-canvas');
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = color;
-            ctx.fillText('Loading...', canvas.width / 2 - 30, canvas.height / 3);
+            this.initLiveCamera();
+            this.initSensors();
+        },
 
-            // Setup the WebSocket connection and start the player
-            const cameraClient = new WebSocket(`ws://${window.location.hostname}:${cameraPort}/`);
-            const player = new jsmpeg(cameraClient, {canvas: canvas});
-
+        initSensors: function () {
             const sensorsClient = new WebSocket(`ws://${window.location.hostname}:${sensorsPort}/`);
 
-            Dashboard.createChart();
+            Dashboard.initChart();
 
             sensorsClient.onmessage = function (event) {
                 const isCameraFrame = event.data instanceof Blob;
@@ -28,25 +24,39 @@
                     const payload = JSON.parse(event.data);
 
                     if (payload['type'] === 'distance') {
-                        Dashboard.displayDistanceSensors(payload['samples']);
+                        Dashboard.plotDistanceSensorsDataReadFor(payload['samples']);
                     } else if (payload['type'] === 'motion') {
-                        Dashboard.displayMotionSensors(payload['samples']);
+                        Dashboard.plotMotionSensorsDataReadFor(payload['samples']);
                     }
-
-                    console.log(payload);
                 }
             };
         },
 
-        displayDistanceSensors(samples) {
-            this.addDistanceChartDatasets(samples);
-            this.updateDatasets(Dashboard.distanceDatasets, samples);
+        initLiveCamera: function () {
+            const cameraClient = new WebSocket(`ws://${window.location.hostname}:${cameraPort}/`);
+            const canvas = document.getElementById('video-canvas');
+            const ctx = canvas.getContext('2d');
+
+            ctx.fillStyle = color;
+            ctx.fillText('Loading...', canvas.width / 2 - 30, canvas.height / 3);
+
+            new jsmpeg(cameraClient, {canvas: canvas});
+        },
+
+        plotDistanceSensorsDataReadFor(samples) {
+            this.addDistanceChartDatasetsFor(samples);
+            this.updateDatasets(Dashboard.chartDistanceDatasets, samples);
+        },
+
+        plotMotionSensorsDataReadFor(samples) {
+            this.addMotionChartDatasetsFor(samples);
+            this.updateDatasets(Dashboard.chartMotionDatasets, samples);
         },
 
         updateChart: function () {
             Dashboard.chartInstance.data.datasets = [];
-            Dashboard.chartInstance.data.datasets.push(...Dashboard.motionDatasets);
-            Dashboard.chartInstance.data.datasets.push(...Dashboard.distanceDatasets);
+            Dashboard.chartInstance.data.datasets.push(...Dashboard.chartMotionDatasets);
+            Dashboard.chartInstance.data.datasets.push(...Dashboard.chartDistanceDatasets);
             Dashboard.chartInstance.update();
         },
 
@@ -60,14 +70,12 @@
                         dataset.data.shift();
                     }
                 })
-
             });
         },
 
         updateDatasets: function (datasets, samples) {
             for (let i = 0; i < samples.length; i++) {
                 const s = samples[i];
-
                 let data = datasets[i].data;
 
                 data.push(Dashboard.getPreparedSampleDataFor(s));
@@ -75,11 +83,6 @@
 
             this.removeOldSamples();
             this.updateChart();
-        },
-
-        displayMotionSensors(samples) {
-            this.addMotionChartDatasets(samples);
-            this.updateDatasets(Dashboard.motionDatasets, samples);
         },
 
         getPreparedSampleDataFor: function (sample) {
@@ -119,10 +122,6 @@
                             ticks: {
                                 min: 0,
                                 max: 1750,
-                                major: {
-                                    fontStyle: 'bold',
-                                    fontColor: '#FF0000'
-                                }
                             }
                         }]
                     }
@@ -130,18 +129,18 @@
             })
         },
 
-        createChart: function () {
+        initChart: function () {
             const sensorsWrapper = $('#sensors-wrapper');
             const canvasId = 'chart-canvas';
-            sensorsWrapper.append(Dashboard.createChartCanvas(canvasId));
+            sensorsWrapper.append(Dashboard.getNewChartCanvas(canvasId));
             this.createChartInstance(canvasId);
         },
 
-        addMotionChartDatasets: function (samples) {
-            if (Dashboard.motionDatasets.length === 0) {
+        addMotionChartDatasetsFor: function (samples) {
+            if (Dashboard.chartMotionDatasets.length === 0) {
                 samples.forEach(function (s) {
                     const color = Dashboard.getRandomColor();
-                    Dashboard.motionDatasets.push({
+                    Dashboard.chartMotionDatasets.push({
                         label: s.id,
                         borderColor: color,
                         backgroundColor: color,
@@ -155,11 +154,11 @@
             }
         },
 
-        addDistanceChartDatasets: function (samples) {
-            if (Dashboard.distanceDatasets.length === 0) {
+        addDistanceChartDatasetsFor: function (samples) {
+            if (Dashboard.chartDistanceDatasets.length === 0) {
                 samples.forEach(function (s) {
                     const color = Dashboard.getRandomColor();
-                    Dashboard.distanceDatasets.push({
+                    Dashboard.chartDistanceDatasets.push({
                         borderColor: color,
                         backgroundColor: color,
                         label: s.id,
@@ -170,7 +169,7 @@
                 });
             }
         },
-        createChartCanvas: function (id) {
+        getNewChartCanvas: function (id) {
             return $('<canvas>').attr('id', id).width(400).height(400);
         },
 
@@ -182,9 +181,7 @@
             }
             return color;
         }
-
     };
-
 
     Dashboard.init();
 
