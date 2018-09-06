@@ -24,7 +24,6 @@ Detect Motion, Distance and stream live Raspberry Pi camera using websockets.
 Assuming your Raspberry Pi is connected to the same router as your workstation, and both received an IP from the DHCP server, use Raspberry's IP in your browser like this: 
 ```
 http://192.168.0.71:8082
-
 ```
 Enjoy playing around with motion and distance sensors while the live camera is watching you :)  
 
